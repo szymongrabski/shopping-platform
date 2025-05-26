@@ -1,39 +1,32 @@
 package com.example.authservice.service;
 
 import com.example.authservice.domain.User;
-import com.example.authservice.domain.UserRole;
 import com.example.authservice.dto.request.LoginRequest;
 import com.example.authservice.dto.request.RegisterRequest;
 import com.example.authservice.dto.response.AuthResponse;
-import com.example.authservice.exceptions.UserAlreadyExistsException;
-import com.example.authservice.exceptions.UserNotFoundException;
-import com.example.authservice.repository.UserRepository;
+import com.example.authservice.kafka.producer.UserEventPublisher;
 import com.example.common.event.UserRegisteredEvent;
-import com.example.common.kafka.KafkaTopic;
 import lombok.RequiredArgsConstructor;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final KafkaTemplate<String, UserRegisteredEvent> kafkaTemplate;
+    private final UserService userService;
+    private final JwtService jwtService;
+    private final UserEventPublisher userEventPublisher;
 
     public AuthResponse register(RegisterRequest registerRequest) {
-        validateIfUserExists(registerRequest.getEmail());
+        userService.validateIfUserExists(registerRequest.getEmail());
 
-        User savedUser = createAndSaveUser(registerRequest);
+        User user = userService.createUser(registerRequest);
+        User savedUser = userService.saveUser(user);
+
         publishUserRegisteredEvent(savedUser, registerRequest);
 
         String token = jwtService.generateToken(savedUser);
@@ -43,26 +36,10 @@ public class AuthService {
     public AuthResponse login(LoginRequest loginRequest) {
         authenticateUser(loginRequest);
 
-        User user = findUserByEmail(loginRequest.getEmail());
+        User user = userService.findUserByEmail(loginRequest.getEmail());
         String token = jwtService.generateToken(user);
 
         return buildAuthResponse(token);
-    }
-
-    private void validateIfUserExists(String email) {
-        if (userRepository.findByEmail(email).isPresent()) {
-            throw new UserAlreadyExistsException("Email already in use");
-        }
-    }
-
-    private User createAndSaveUser(RegisterRequest request) {
-        User user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .createdAt(LocalDateTime.now())
-                .roles(List.of(UserRole.USER))
-                .build();
-        return userRepository.save(user);
     }
 
     private void publishUserRegisteredEvent(User user, RegisterRequest request) {
@@ -74,8 +51,7 @@ public class AuthService {
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .build();
-
-        kafkaTemplate.send(KafkaTopic.USER_REGISTERED.getTopicName(), event);
+        userEventPublisher.publishUserRegistered(event);
     }
 
     private void authenticateUser(LoginRequest request) {
@@ -89,11 +65,6 @@ public class AuthService {
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Invalid username or password");
         }
-    }
-
-    private User findUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
     }
 
     private AuthResponse buildAuthResponse(String token) {

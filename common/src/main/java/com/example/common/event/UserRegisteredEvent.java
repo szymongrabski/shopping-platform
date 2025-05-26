@@ -2,14 +2,14 @@ package com.example.common.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 
+@Data
 @Builder
-@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserRegisteredEvent implements Serializable {

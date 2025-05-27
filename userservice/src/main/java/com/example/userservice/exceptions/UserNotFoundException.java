@@ -1,9 +1,6 @@
-package com.example.authservice.exceptions;
+package com.example.userservice.exceptions;
 
 public class UserNotFoundException extends RuntimeException {
-    public UserNotFoundException(String email) {
-        super("User with email " + email + " not found");
-    }
     public UserNotFoundException(Long id) {
         super("User with id " + id + " not found");
     }

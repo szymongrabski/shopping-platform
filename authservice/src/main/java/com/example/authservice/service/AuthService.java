@@ -1,71 +1,76 @@
 package com.example.authservice.service;
 
 import com.example.authservice.domain.User;
-import com.example.authservice.domain.UserRole;
 import com.example.authservice.dto.request.LoginRequest;
 import com.example.authservice.dto.request.RegisterRequest;
 import com.example.authservice.dto.response.AuthResponse;
-import com.example.authservice.exceptions.UserAlreadyExistsException;
-import com.example.authservice.exceptions.UserNotFoundException;
-import com.example.authservice.repository.UserRepository;
+import com.example.authservice.kafka.producer.UserEventPublisher;
+import com.example.common.event.UserRegisteredEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final UserService userService;
+    private final JwtService jwtService;
+    private final UserEventPublisher userEventPublisher;
 
     public AuthResponse register(RegisterRequest registerRequest) {
-        if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            throw new UserAlreadyExistsException("Email already in use");
-        }
+        userService.validateIfUserExists(registerRequest.getEmail());
 
-        User user = User.builder()
-                .email(registerRequest.getEmail())
-                .password(passwordEncoder.encode(registerRequest.getPassword()))
-                .createdAt(LocalDateTime.now())
-                .roles(List.of(UserRole.USER))
-                .build();
+        User user = userService.createUser(registerRequest);
+        User savedUser = userService.saveUser(user);
 
-        userRepository.save(user);
+        publishUserRegisteredEvent(savedUser, registerRequest);
 
-        String token = jwtService.generateToken(user);
-
-        return AuthResponse.builder()
-                .token(token)
-                .build();
+        String token = jwtService.generateToken(savedUser);
+        return buildAuthResponse(token);
     }
 
     public AuthResponse login(LoginRequest loginRequest) {
+        authenticateUser(loginRequest);
+
+        User user = userService.findUserByEmail(loginRequest.getEmail());
+        String token = jwtService.generateToken(user);
+
+        return buildAuthResponse(token);
+    }
+
+    private void publishUserRegisteredEvent(User user, RegisterRequest request) {
+        UserRegisteredEvent event = UserRegisteredEvent.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .birthDate(request.getBirthDate())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .build();
+        userEventPublisher.publishUserRegistered(event);
+    }
+
+    private void authenticateUser(LoginRequest request) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            loginRequest.getEmail(),
-                            loginRequest.getPassword()
+                            request.getEmail(),
+                            request.getPassword()
                     )
             );
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Invalid username or password");
         }
+    }
 
-        User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new UserNotFoundException(loginRequest.getEmail()));
-
-        String token = jwtService.generateToken(user);
-
+    private AuthResponse buildAuthResponse(String token) {
         return AuthResponse.builder()
                 .token(token)
                 .build();
     }
 }
+

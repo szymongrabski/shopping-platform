@@ -11,9 +11,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -42,12 +41,11 @@ public class AuthController {
     @PostMapping("/{id}/change-password")
     public ResponseEntity<Void> changePassword(@PathVariable Long id,
                                                @RequestBody @Valid PasswordChangeRequest request,
-                                               @AuthenticationPrincipal Jwt jwt) {
-        Long userId = jwt.getClaim("id");
-        if (userId == null || !userId.equals(id)) {
+                                               Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        if (!userId.equals(id)) {
             throw new UnauthorizedException("User not authorized to delete this user");
         }
-
         userService.changePassword(id, request.getOldPassword(), request.getNewPassword());
         return ResponseEntity.noContent().build();
     }

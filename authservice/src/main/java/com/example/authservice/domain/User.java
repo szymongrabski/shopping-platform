@@ -2,6 +2,7 @@ package com.example.authservice.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -34,6 +35,7 @@ public class User implements UserDetails {
     @Column(name = "role")
     private List<UserRole> roles = new ArrayList<>();
 
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
     @Override
@@ -43,6 +45,6 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return String.valueOf(id);
     }
 }

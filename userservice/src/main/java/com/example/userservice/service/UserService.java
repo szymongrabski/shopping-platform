@@ -4,7 +4,7 @@ import com.example.common.event.UserChangedEmailEvent;
 import com.example.common.event.UserDeletedEvent;
 import com.example.userservice.domain.User;
 import com.example.userservice.dto.request.UserRequest;
-import com.example.userservice.exceptions.UnauthorizedException;
+import com.example.userservice.exceptions.ForbiddenException;
 import com.example.userservice.exceptions.UserNotFoundException;
 import com.example.userservice.kafka.producer.UserEventPublisher;
 import com.example.userservice.repository.UserRepository;
@@ -63,7 +63,7 @@ public class UserService {
 
     public void authorizeUser(Long jwtUserId, Long targetUserId) {
         if (jwtUserId == null || !jwtUserId.equals(targetUserId)) {
-            throw new UnauthorizedException("User not authorized to perform this action");
+            throw new ForbiddenException("User not authorized to perform this action");
         }
     }
 }

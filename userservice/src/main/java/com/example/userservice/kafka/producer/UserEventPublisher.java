@@ -13,10 +13,10 @@ public class UserEventPublisher {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void publishUserDeleted(UserDeletedEvent event) {
-        kafkaTemplate.send(KafkaTopic.USER_EVENTS.getTopicName(), event);
+        kafkaTemplate.send(KafkaTopic.USER_EVENTS, event);
     }
 
     public void publishUserEmailChanged(UserChangedEmailEvent event) {
-        kafkaTemplate.send(KafkaTopic.USER_EVENTS.getTopicName(), event);
+        kafkaTemplate.send(KafkaTopic.USER_EVENTS, event);
     }
 }

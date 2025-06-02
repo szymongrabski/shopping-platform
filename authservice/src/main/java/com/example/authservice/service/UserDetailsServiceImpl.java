@@ -12,7 +12,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserService userService;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userService.findUserByEmail(username);
+    public UserDetails loadUserByUsername(String id) {
+        try {
+            Long userId = Long.parseLong(id);
+            return userService.findById(userId);
+        } catch (NumberFormatException e) {
+            throw new UsernameNotFoundException("Invalid user ID format: " + id);
+        }
     }
 }

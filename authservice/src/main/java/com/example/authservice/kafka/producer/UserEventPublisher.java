@@ -12,6 +12,6 @@ public class UserEventPublisher {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void publishUserRegistered(UserRegisteredEvent event) {
-        kafkaTemplate.send(KafkaTopic.USER_EVENTS.getTopicName(), event);
+        kafkaTemplate.send(KafkaTopic.USER_EVENTS, event);
     }
 }

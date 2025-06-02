@@ -3,6 +3,7 @@ package com.example.authservice.kafka.consumer;
 import com.example.authservice.service.UserService;
 import com.example.common.event.UserChangedEmailEvent;
 import com.example.common.event.UserDeletedEvent;
+import com.example.common.kafka.KafkaTopic;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @KafkaListener(
-        topics = "user-events",
+        topics = KafkaTopic.USER_EVENTS,
         groupId = "auth-service-group",
         containerFactory = "kafkaListenerContainerFactory")
 public class UserEventListener {

@@ -16,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import javax.crypto.SecretKey;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -39,7 +40,6 @@ public class SecurityConfig {
                 ).build();
     }
 
-    // todo change to assymetric
     @Bean
     public JwtDecoder jwtDecoder() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
@@ -51,10 +51,10 @@ public class SecurityConfig {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(jwt -> {
             Collection<String> roles = jwt.getClaimAsStringList("roles");
-            if (roles == null) return java.util.Collections.emptyList();
+            if (roles == null) return Collections.emptyList();
 
             return roles.stream()
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                    .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
         });
         return converter;

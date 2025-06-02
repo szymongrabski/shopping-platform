@@ -1,6 +1,7 @@
 package com.example.userservice.kafka.consumer;
 
 import com.example.common.event.UserRegisteredEvent;
+import com.example.common.kafka.KafkaTopic;
 import com.example.userservice.domain.User;
 import com.example.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @KafkaListener(
-        topics = "user-events",
+        topics = KafkaTopic.USER_EVENTS,
         groupId = "user-service-group",
         containerFactory = "kafkaListenerContainerFactory"
 )

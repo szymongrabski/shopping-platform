@@ -1,5 +1,6 @@
 package com.example.userservice.kafka.producer;
 
+import com.example.common.kafka.KafkaTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +34,7 @@ public class KafkaProducerConfig {
     @Bean
     public KafkaTemplate<String, Object> kafkaTemplate() {
         KafkaTemplate<String, Object> template = new KafkaTemplate<>(producerFactory());
-        template.setDefaultTopic("user-events");
+        template.setDefaultTopic(KafkaTopic.USER_EVENTS);
         return template;
     }
 }

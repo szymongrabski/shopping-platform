@@ -9,8 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,9 +25,9 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
-        Long id = jwt.getClaim("id");
-        return ResponseEntity.ok(userService.getUserById(id));
+    public ResponseEntity<User> getCurrentUser(Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        return ResponseEntity.ok(userService.getUserById(userId));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -40,8 +39,8 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id,
                                            @RequestBody @Valid UserRequest userRequest,
-                                           @AuthenticationPrincipal Jwt jwt) {
-        Long userId = jwt.getClaim("id");
+                                           Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
         userService.authorizeUser(userId, id);
 
         User user = userService.updateUser(id, userRequest);
@@ -49,8 +48,9 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
-        Long userId = jwt.getClaim("id");
+    public ResponseEntity<Void> deleteById(@PathVariable Long id,
+                                           Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
         userService.authorizeUser(userId, id);
 
         userService.deleteUserById(id);

@@ -14,7 +14,8 @@ import java.util.List;
 public interface NominatimClient {
     @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
     List<NominatimResponse> searchCity(
-            @RequestParam("q") String cityName,
+            @RequestParam("city") String cityName,
+            @RequestParam("country") String country,
             @RequestParam(value = "format", defaultValue = "json") String format,
             @RequestParam(value = "limit", defaultValue = "1") int limit
     );

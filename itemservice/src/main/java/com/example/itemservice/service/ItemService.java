@@ -1,14 +1,19 @@
 package com.example.itemservice.service;
 
+import com.example.itemservice.domain.Category;
 import com.example.itemservice.domain.City;
 import com.example.itemservice.domain.Item;
 import com.example.itemservice.domain.ItemStatus;
 import com.example.itemservice.dto.request.ItemRequest;
+import com.example.itemservice.dto.request.LocationFilterRequest;
 import com.example.itemservice.exceptions.notfound.ItemNotFoundException;
 import com.example.itemservice.repository.ItemRepository;
+import com.example.itemservice.specification.ItemSpecification;
+import com.example.itemservice.util.GeoUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,8 +22,32 @@ public class ItemService {
     private final CityService cityService;
     private final ItemRepository itemRepository;
 
-    public Page<Item> findAll(Pageable pageable) {
-        return itemRepository.findAll(pageable);
+    public Page<Item> findAll(Pageable pageable,
+                              String title,
+                              Double minPrice,
+                              Double maxPrice,
+                              Category category,
+                              ItemStatus status,
+                              LocationFilterRequest locationFilter) {
+
+        Specification<Item> spec = ItemSpecification.titleContains(title)
+                .and(ItemSpecification.priceGreaterThanOrEqual(minPrice))
+                .and(ItemSpecification.priceLessThanOrEqual(maxPrice))
+                .and(ItemSpecification.hasCategory(category))
+                .and(ItemSpecification.hasStatus(status));
+
+        if (locationFilter != null) {
+            if ((locationFilter.getCityName() == null) != (locationFilter.getRadiusKm() == null)) {
+                throw new IllegalArgumentException("You must provide both cityName and radiusKm, or neither of them");
+            }
+            if (locationFilter.getCityName() != null) {
+                City city = cityService.findCityByName(locationFilter.getCityName());
+                double[] box = GeoUtils.calculateBoundingBox(city.getLatitude(), city.getLongitude(), locationFilter.getRadiusKm());
+                spec = spec.and(ItemSpecification.withinBoundingBox(box[0], box[1], box[2], box[3]));
+            }
+        }
+
+        return itemRepository.findAll(spec, pageable);
     }
 
     public Item findById(Long id) {

@@ -1,7 +1,10 @@
 package com.example.itemservice.controller;
 
+import com.example.itemservice.domain.Category;
 import com.example.itemservice.domain.Item;
+import com.example.itemservice.domain.ItemStatus;
 import com.example.itemservice.dto.request.ItemRequest;
+import com.example.itemservice.dto.request.LocationFilterRequest;
 import com.example.itemservice.exceptions.forbidden.ForbiddenException;
 import com.example.itemservice.service.ItemService;
 import jakarta.validation.Valid;
@@ -22,8 +25,20 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping
-    public ResponseEntity<Page<Item>> getItems(Pageable pageable) {
-        return ResponseEntity.ok(itemService.findAll(pageable));
+    public ResponseEntity<Page<Item>> getItems(Pageable pageable,
+                                               @RequestParam(required = false) String title,
+                                               @RequestParam(required = false) Double minPrice,
+                                               @RequestParam(required = false) Double maxPrice,
+                                               @RequestParam(required = false) Category category,
+                                               @RequestParam(required = false) ItemStatus status,
+                                               @ModelAttribute LocationFilterRequest locationFilterRequest) {
+        return ResponseEntity.ok(itemService.findAll(pageable,
+                title,
+                minPrice,
+                maxPrice,
+                category,
+                status,
+                locationFilterRequest));
     }
 
     @GetMapping("/{id}")

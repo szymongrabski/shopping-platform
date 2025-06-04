@@ -19,11 +19,7 @@ public class CityService {
     public City findCityByName(String cityName) {
         return cityRepository.findByName(cityName)
                 .orElseGet(() -> {
-                    List<NominatimResponse> results = nominatimClient.searchCity(cityName, "json", 1);
-                    if (results.isEmpty()) {
-                        throw new CityNotFoundException(cityName);
-                    }
-                    City city = createCity(results.getFirst());
+                    City city = fetchCityFromNominatim(cityName);
                     return cityRepository.save(city);
                 });
     }
@@ -34,5 +30,13 @@ public class CityService {
                 .latitude(nominatimResponse.getLat())
                 .longitude(nominatimResponse.getLon())
                 .build();
+    }
+
+    private City fetchCityFromNominatim(String cityName) {
+        List<NominatimResponse> result = nominatimClient.searchCity(cityName, "Polska","json", 1);
+        if (result.isEmpty()) {
+            throw new CityNotFoundException(cityName);
+        }
+        return createCity(result.getFirst());
     }
 }

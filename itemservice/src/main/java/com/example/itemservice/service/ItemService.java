@@ -6,6 +6,7 @@ import com.example.itemservice.domain.Item;
 import com.example.itemservice.domain.ItemStatus;
 import com.example.itemservice.dto.request.ItemRequest;
 import com.example.itemservice.dto.request.LocationFilterRequest;
+import com.example.itemservice.exceptions.conflict.InvalidItemStatusTransition;
 import com.example.itemservice.exceptions.notfound.ItemNotFoundException;
 import com.example.itemservice.repository.ItemRepository;
 import com.example.itemservice.specification.ItemSpecification;
@@ -16,11 +17,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 public class ItemService {
     private final CityService cityService;
     private final ItemRepository itemRepository;
+    private static final EnumMap<ItemStatus, Set<ItemStatus>> allowedStatusTransitions = new EnumMap<>(ItemStatus.class);
+
+    static {
+        allowedStatusTransitions.put(ItemStatus.ACTIVE, EnumSet.of(ItemStatus.ORDERED, ItemStatus.ARCHIVED));
+        allowedStatusTransitions.put(ItemStatus.ORDERED, EnumSet.of(ItemStatus.SOLD, ItemStatus.ACTIVE));
+        allowedStatusTransitions.put(ItemStatus.SOLD, EnumSet.noneOf(ItemStatus.class));
+        allowedStatusTransitions.put(ItemStatus.ARCHIVED, EnumSet.of(ItemStatus.ACTIVE));
+    }
 
     public Page<Item> findAll(Pageable pageable,
                               String title,
@@ -46,7 +59,6 @@ public class ItemService {
                 spec = spec.and(ItemSpecification.withinBoundingBox(box[0], box[1], box[2], box[3]));
             }
         }
-
         return itemRepository.findAll(spec, pageable);
     }
 
@@ -75,6 +87,15 @@ public class ItemService {
         return itemRepository.save(item);
     }
 
+    public Item changeStatus(Long id, ItemStatus newStatus) {
+        Item item = findById(id);
+        if (!canTransition(item.getItemStatus(), newStatus)) {
+            throw new InvalidItemStatusTransition(item.getItemStatus(), newStatus);
+        }
+        item.setItemStatus(newStatus);
+        return itemRepository.save(item);
+    }
+
     public Item updateItem(Long id, ItemRequest itemRequest) {
         City city = cityService.findCityByName(itemRequest.getCityName());
 
@@ -88,5 +109,9 @@ public class ItemService {
                 .city(city)
                 .build();
         return itemRepository.save(item);
+    }
+
+    private static boolean canTransition(ItemStatus from, ItemStatus to) {
+        return allowedStatusTransitions.getOrDefault(from, EnumSet.noneOf(ItemStatus.class)).contains(to);
     }
 }

@@ -69,6 +69,13 @@ public class ItemController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/change-status")
+    public ResponseEntity<Item> changeItemStatus(@PathVariable Long id, @RequestParam ItemStatus newStatus) {
+        Item updatedItem = itemService.changeStatus(id, newStatus);
+        return ResponseEntity.ok(updatedItem);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
         itemService.deleteById(id);

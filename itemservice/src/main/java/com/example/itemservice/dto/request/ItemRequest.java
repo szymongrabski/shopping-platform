@@ -2,7 +2,6 @@ package com.example.itemservice.dto.request;
 
 import com.example.itemservice.domain.Category;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

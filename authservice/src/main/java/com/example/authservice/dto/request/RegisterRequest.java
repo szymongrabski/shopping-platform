@@ -2,6 +2,7 @@ package com.example.authservice.dto.request;
 
 import com.example.authservice.validation.Adult;
 import com.example.authservice.validation.ValidPassword;
+import com.example.authservice.validation.ValidPhoneNumber;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,6 +30,10 @@ public class RegisterRequest {
 
     @NotEmpty
     private String lastName;
+
+    @NotEmpty
+    @ValidPhoneNumber
+    private String phoneNumber;
 
     @Past
     @Adult

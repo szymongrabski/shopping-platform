@@ -27,6 +27,7 @@ public class UserEventListener {
                 .username(event.getUsername())
                 .firstName(event.getFirstName())
                 .lastName(event.getLastName())
+                .phoneNumber(event.getPhoneNumber())
                 .birthDate(event.getBirthDate())
                 .build();
         userService.saveUser(user);

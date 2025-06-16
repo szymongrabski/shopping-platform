@@ -1,5 +1,6 @@
 package com.example.userservice.dto.request;
 
+import com.example.userservice.validation.ValidPhoneNumber;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -21,4 +22,8 @@ public class UserRequest {
 
     @NotEmpty
     private String lastName;
+
+    @NotEmpty
+    @ValidPhoneNumber
+    private String phoneNumber;
 }

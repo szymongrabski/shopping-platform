@@ -16,7 +16,7 @@ public interface NominatimClient {
     List<NominatimResponse> searchCity(
             @RequestParam("city") String cityName,
             @RequestParam("country") String country,
-            @RequestParam(value = "format", defaultValue = "json") String format,
-            @RequestParam(value = "limit", defaultValue = "1") int limit
+            @RequestParam(value = "format") String format,
+            @RequestParam(value = "limit") int limit
     );
 }

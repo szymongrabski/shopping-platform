@@ -48,6 +48,7 @@ public class UserService {
         user.setUsername(userRequest.getUsername());
         user.setFirstName(userRequest.getFirstName());
         user.setLastName(userRequest.getLastName());
+        user.setPhoneNumber(userRequest.getPhoneNumber());
 
         if (!user.getEmail().equals(userRequest.getEmail())) {
             user.setEmail(userRequest.getEmail());

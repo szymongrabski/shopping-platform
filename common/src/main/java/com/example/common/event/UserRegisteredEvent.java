@@ -23,5 +23,7 @@ public class UserRegisteredEvent implements Serializable {
 
     private String lastName;
 
+    private String phoneNumber;
+
     private LocalDate birthDate;
 }

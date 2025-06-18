@@ -1,8 +1,8 @@
 package com.example.authservice.kafka.consumer;
 
 import com.example.authservice.service.UserService;
-import com.example.common.event.UserChangedEmailEvent;
-import com.example.common.event.UserDeletedEvent;
+import com.example.common.event.user.UserChangedEmailEvent;
+import com.example.common.event.user.UserDeletedEvent;
 import com.example.common.kafka.KafkaTopic;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaHandler;

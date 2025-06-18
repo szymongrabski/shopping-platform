@@ -5,7 +5,7 @@ import com.example.authservice.dto.request.LoginRequest;
 import com.example.authservice.dto.request.RegisterRequest;
 import com.example.authservice.dto.response.AuthResponse;
 import com.example.authservice.kafka.producer.UserEventPublisher;
-import com.example.common.event.UserRegisteredEvent;
+import com.example.common.event.user.UserRegisteredEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -34,9 +34,9 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest loginRequest) {
-        authenticateUser(loginRequest);
-
-        User user = userService.findUserByEmail(loginRequest.getEmail());
+        User user = userService.findUserByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+        authenticateUser(loginRequest, user.getId());
         String token = jwtService.generateToken(user);
 
         return buildAuthResponse(token);
@@ -54,11 +54,11 @@ public class AuthService {
         userEventPublisher.publishUserRegistered(event);
     }
 
-    private void authenticateUser(LoginRequest request) {
+    private void authenticateUser(LoginRequest request, Long userId) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            request.getEmail(),
+                            userId,
                             request.getPassword()
                     )
             );

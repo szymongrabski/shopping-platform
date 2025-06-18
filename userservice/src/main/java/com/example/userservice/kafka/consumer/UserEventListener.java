@@ -1,6 +1,6 @@
 package com.example.userservice.kafka.consumer;
 
-import com.example.common.event.UserRegisteredEvent;
+import com.example.common.event.user.UserRegisteredEvent;
 import com.example.common.kafka.KafkaTopic;
 import com.example.userservice.domain.User;
 import com.example.userservice.service.UserService;

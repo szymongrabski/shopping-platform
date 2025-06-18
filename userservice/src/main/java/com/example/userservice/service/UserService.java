@@ -1,7 +1,7 @@
 package com.example.userservice.service;
 
-import com.example.common.event.UserChangedEmailEvent;
-import com.example.common.event.UserDeletedEvent;
+import com.example.common.event.user.UserChangedEmailEvent;
+import com.example.common.event.user.UserDeletedEvent;
 import com.example.userservice.domain.User;
 import com.example.userservice.dto.request.UserRequest;
 import com.example.userservice.exceptions.ForbiddenException;

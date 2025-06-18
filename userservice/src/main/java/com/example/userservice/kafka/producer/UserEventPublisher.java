@@ -1,7 +1,7 @@
 package com.example.userservice.kafka.producer;
 
-import com.example.common.event.UserChangedEmailEvent;
-import com.example.common.event.UserDeletedEvent;
+import com.example.common.event.user.UserChangedEmailEvent;
+import com.example.common.event.user.UserDeletedEvent;
 import com.example.common.kafka.KafkaTopic;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;

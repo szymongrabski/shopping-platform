@@ -1,7 +1,7 @@
 package com.example.orderservice.kafka.producer;
 
 import com.example.common.kafka.KafkaTopic;
-import com.fasterxml.jackson.databind.ser.std.StringSerializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +24,7 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
         props.put(JsonSerializer.TYPE_MAPPINGS,
-                "OrderCreatedEvent:com.example.common.event.OrderCreatedEvent");
+                "OrderAcceptedEvent:com.example.common.event.order.OrderAcceptedEvent");
 
         return new DefaultKafkaProducerFactory<>(props);
     }

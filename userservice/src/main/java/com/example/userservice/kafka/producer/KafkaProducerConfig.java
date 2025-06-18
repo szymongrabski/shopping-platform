@@ -24,9 +24,9 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
         props.put(JsonSerializer.TYPE_MAPPINGS,
-                "UserRegisteredEvent:com.example.common.event.UserRegisteredEvent," +
-                        "UserDeletedEvent:com.example.common.event.UserDeletedEvent," +
-                "UserChangedEmailEvent:com.example.common.event.UserChangedEmailEvent");
+                "UserRegisteredEvent:com.example.common.event.user.UserRegisteredEvent," +
+                        "UserDeletedEvent:com.example.common.event.user.UserDeletedEvent," +
+                "UserChangedEmailEvent:com.example.common.event.user.UserChangedEmailEvent");
 
         return new DefaultKafkaProducerFactory<>(props);
     }

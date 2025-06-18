@@ -8,5 +8,5 @@ public class ItemResponse {
     private Long id;
     private Long userId;
     private double price;
-    private ItemStatus status;
+    private ItemStatus itemStatus;
 }

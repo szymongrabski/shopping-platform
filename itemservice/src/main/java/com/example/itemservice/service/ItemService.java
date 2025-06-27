@@ -6,6 +6,7 @@ import com.example.itemservice.domain.Item;
 import com.example.itemservice.domain.ItemStatus;
 import com.example.itemservice.dto.request.ItemRequest;
 import com.example.itemservice.dto.request.LocationFilterRequest;
+import com.example.itemservice.exceptions.badrequest.BadRequestException;
 import com.example.itemservice.exceptions.conflict.InvalidItemStatusTransition;
 import com.example.itemservice.exceptions.notfound.ItemNotFoundException;
 import com.example.itemservice.repository.ItemRepository;
@@ -51,7 +52,7 @@ public class ItemService {
 
         if (locationFilter != null) {
             if ((locationFilter.getCityName() == null) != (locationFilter.getRadiusKm() == null)) {
-                throw new IllegalArgumentException("You must provide both cityName and radiusKm, or neither of them");
+                throw new BadRequestException("You must provide both cityName and radiusKm, or neither of them");
             }
             if (locationFilter.getCityName() != null) {
                 City city = cityService.findCityByName(locationFilter.getCityName());

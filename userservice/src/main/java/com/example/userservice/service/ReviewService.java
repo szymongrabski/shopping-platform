@@ -47,6 +47,12 @@ public class ReviewService {
                 .orElseThrow(() -> new ReviewNotFound(reviewId));
     }
 
+    public void deleteReview(Long reviewId, Long userId) {
+        Review review = getReviewById(reviewId);
+        userService.authorizeUser(review.getRaterUser().getId(), userId);
+        reviewRepository.delete(review);
+    }
+
     public List<Review> getReviewsForUser(Long userId) {
         return reviewRepository.findByRatedUserId(userId);
     }

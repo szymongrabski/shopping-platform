@@ -6,9 +6,11 @@ import com.example.orderservice.client.ItemServiceClient;
 import com.example.orderservice.domain.*;
 import com.example.orderservice.dto.request.OrderRequest;
 import com.example.orderservice.dto.response.ItemResponse;
-import com.example.orderservice.exception.ItemNotAvailableException;
-import com.example.orderservice.exception.OrderNotFound;
-import com.example.orderservice.exception.UnauthorizedException;
+import com.example.orderservice.exception.badrequest.BadRequestException;
+import com.example.orderservice.exception.conflict.ConflictException;
+import com.example.orderservice.exception.conflict.ItemNotAvailableException;
+import com.example.orderservice.exception.forbidden.ForbiddenException;
+import com.example.orderservice.exception.notfound.OrderNotFound;
 import com.example.orderservice.kafka.producer.OrderEventPublisher;
 import com.example.orderservice.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +23,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-    private final static int PICKUP_DEADLINE_HOURS = 2;
+    private final static int PICKUP_DEADLINE_HOURS = 72;
     private final OrderRepository orderRepository;
     private final ItemServiceClient itemServiceClient;
     private final OrderEventPublisher orderEventPublisher;
@@ -93,10 +95,10 @@ public class OrderService {
         checkIfSeller(order, userId);
 
         if (extraHours <= 0 || extraHours > 72) {
-            throw new IllegalArgumentException("extraHours must be between 1 and 72");
+            throw new BadRequestException("extraHours must be between 1 and 72");
         }
         if (order.getOrderStatus() != OrderStatus.AWAITING_PICKUP) {
-            throw new IllegalStateException("Order is not in AWAITING_PICKUP status");
+            throw new ConflictException("Order is not in AWAITING_PICKUP status");
         }
 
         order.setPickupDeadline(order.getPickupDeadline().plusHours(extraHours));
@@ -114,20 +116,20 @@ public class OrderService {
 
     private void checkIfSeller(Order order, Long userId) {
         if (!Objects.equals(order.getSellerId(), userId)) {
-            throw new UnauthorizedException("User is not owner of this order");
+            throw new ForbiddenException("User is not owner of this order");
         }
     }
 
     private void checkIfBuyer(Order order, Long userId) {
         if (!Objects.equals(order.getBuyerId(), userId)) {
-            throw new UnauthorizedException("User is not owner of this order");
+            throw new ForbiddenException("User is not owner of this order");
         }
     }
 
     private void checkIfSellerOrBuyer(Order order, Long userId) {
-        if (!Objects.equals(order.getSellerId(), userId)
-                || !Objects.equals(order.getBuyerId(), userId)) {
-            throw new UnauthorizedException("User is not owner of this order");
+        if (!Objects.equals(order.getSellerId(), userId) &&
+                !Objects.equals(order.getBuyerId(), userId)) {
+            throw new ForbiddenException("User is not owner of this order");
         }
     }
 }

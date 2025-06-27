@@ -4,7 +4,7 @@ import com.example.common.event.user.UserChangedEmailEvent;
 import com.example.common.event.user.UserDeletedEvent;
 import com.example.userservice.domain.User;
 import com.example.userservice.dto.request.UserRequest;
-import com.example.userservice.exceptions.ForbiddenException;
+import com.example.userservice.exceptions.forbidden.ForbiddenException;
 import com.example.userservice.exceptions.notfound.UserNotFoundException;
 import com.example.userservice.kafka.producer.UserEventPublisher;
 import com.example.userservice.repository.UserRepository;

@@ -1,9 +1,10 @@
-package com.example.userservice.exceptions;
+package com.example.orderservice.exception;
 
 import com.example.common.dto.response.ErrorResponse;
-import com.example.userservice.exceptions.forbidden.ForbiddenException;
-import com.example.userservice.exceptions.notfound.NotFoundException;
-import com.example.userservice.exceptions.notfound.UserNotFoundException;
+import com.example.orderservice.exception.badrequest.BadRequestException;
+import com.example.orderservice.exception.conflict.ConflictException;
+import com.example.orderservice.exception.forbidden.ForbiddenException;
+import com.example.orderservice.exception.notfound.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -36,10 +37,24 @@ public class GlobalExceptionsHandler {
                 .body(ErrorResponse.builder().message(ex.getMessage()).build());
     }
 
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflictException(ConflictException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ErrorResponse.builder().message(ex.getMessage()).build());
+    }
+
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException ex) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
+                .body(ErrorResponse.builder().message(ex.getMessage()).build());
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequestException(ForbiddenException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponse.builder().message(ex.getMessage()).build());
     }
 }

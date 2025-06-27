@@ -32,6 +32,14 @@ public class ReviewController {
         return ResponseEntity.created(location).body(reviewMapper.toResponse(review));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ReviewResponse> deleteReview(@PathVariable Long id,
+                                                       Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        reviewService.deleteReview(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ReviewResponse> getReview(@PathVariable Long id) {
         Review review = reviewService.getReviewById(id);

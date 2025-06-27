@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderCreatedEvent {
+public class OrderCompletedEvent {
     private Long orderId;
     private Long itemId;
+    private Long sellerId;
+    private Long buyerId;
 }

@@ -24,7 +24,6 @@ public class UserEventListener {
         User user = User.builder()
                 .id(event.getId())
                 .email(event.getEmail())
-                .username(event.getUsername())
                 .firstName(event.getFirstName())
                 .lastName(event.getLastName())
                 .phoneNumber(event.getPhoneNumber())

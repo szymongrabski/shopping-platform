@@ -1,6 +1,7 @@
 package com.example.orderservice.service;
 
 import com.example.common.event.order.OrderAcceptedEvent;
+import com.example.common.event.order.OrderCompletedEvent;
 import com.example.orderservice.client.ItemServiceClient;
 import com.example.orderservice.domain.*;
 import com.example.orderservice.dto.request.OrderRequest;
@@ -13,11 +14,14 @@ import com.example.orderservice.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+    private final static int PICKUP_DEADLINE_HOURS = 2;
     private final OrderRepository orderRepository;
     private final ItemServiceClient itemServiceClient;
     private final OrderEventPublisher orderEventPublisher;
@@ -34,7 +38,6 @@ public class OrderService {
                 .buyerId(userId)
                 .itemId(itemResponse.getId())
                 .orderStatus(OrderStatus.PENDING_SELLER_CONFIRMATION)
-                .orderType(request.getOrderType())
                 .price(itemResponse.getPrice())
                 .build();
 
@@ -44,11 +47,8 @@ public class OrderService {
     public Order acceptOrder(Long orderId, Long userId) {
         Order order = getOrderById(orderId);
         checkIfSeller(order, userId);
-        if (order.getOrderType() == OrderType.PERSONAL) {
-            order.setOrderStatus(OrderStatus.AWAITING_PICKUP);
-        } else {
-            order.setOrderStatus(OrderStatus.AWAITING_PAYMENT);
-        }
+        order.setOrderStatus(OrderStatus.AWAITING_PICKUP);
+        order.setPickupDeadline(LocalDateTime.now().plusMinutes(PICKUP_DEADLINE_HOURS));
         orderEventPublisher.publishOrderAccepted(OrderAcceptedEvent.builder()
                 .orderId(orderId)
                 .itemId(order.getItemId())
@@ -69,6 +69,44 @@ public class OrderService {
         return order;
     }
 
+    public List<Order> getExpiredOrders() {
+        LocalDateTime now = LocalDateTime.now();
+        return orderRepository
+                .findByOrderStatusAndPickupDeadlineBefore(OrderStatus.AWAITING_PICKUP, now);
+    }
+
+    public Order confirmPickup(Long orderId, Long userId) {
+        Order order = getOrderById(orderId);
+        checkIfBuyer(order, userId);
+        order.setOrderStatus(OrderStatus.COMPLETED);
+        orderEventPublisher.publishOrderCompletedEvent(OrderCompletedEvent.builder()
+                .orderId(orderId)
+                .itemId(order.getItemId())
+                .sellerId(order.getSellerId())
+                .buyerId(order.getBuyerId())
+                .build());
+        return orderRepository.save(order);
+    }
+
+    public Order extendPickupDeadline(Long orderId, Long userId, int extraHours) {
+        Order order = getOrderById(orderId);
+        checkIfSeller(order, userId);
+
+        if (extraHours <= 0 || extraHours > 72) {
+            throw new IllegalArgumentException("extraHours must be between 1 and 72");
+        }
+        if (order.getOrderStatus() != OrderStatus.AWAITING_PICKUP) {
+            throw new IllegalStateException("Order is not in AWAITING_PICKUP status");
+        }
+
+        order.setPickupDeadline(order.getPickupDeadline().plusHours(extraHours));
+        return orderRepository.save(order);
+    }
+
+    public void saveAllOrders(List<Order> orders) {
+        orderRepository.saveAll(orders);
+    }
+
     private Order getOrderById(Long orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFound(orderId));
@@ -76,6 +114,12 @@ public class OrderService {
 
     private void checkIfSeller(Order order, Long userId) {
         if (!Objects.equals(order.getSellerId(), userId)) {
+            throw new UnauthorizedException("User is not owner of this order");
+        }
+    }
+
+    private void checkIfBuyer(Order order, Long userId) {
+        if (!Objects.equals(order.getBuyerId(), userId)) {
             throw new UnauthorizedException("User is not owner of this order");
         }
     }

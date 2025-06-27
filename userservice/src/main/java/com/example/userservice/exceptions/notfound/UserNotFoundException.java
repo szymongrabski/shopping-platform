@@ -1,4 +1,4 @@
-package com.example.userservice.exceptions;
+package com.example.userservice.exceptions.notfound;
 
 public class UserNotFoundException extends RuntimeException {
     public UserNotFoundException(Long id) {

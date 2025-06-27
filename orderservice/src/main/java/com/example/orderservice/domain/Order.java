@@ -25,9 +25,6 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-    @Enumerated(EnumType.STRING)
-    private OrderType orderType;
-
     private LocalDateTime pickupDeadline;
 
     @CreationTimestamp

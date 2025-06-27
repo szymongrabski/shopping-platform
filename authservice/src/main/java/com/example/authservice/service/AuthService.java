@@ -46,7 +46,6 @@ public class AuthService {
         UserRegisteredEvent event = UserRegisteredEvent.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .username(user.getUsername())
                 .birthDate(request.getBirthDate())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())

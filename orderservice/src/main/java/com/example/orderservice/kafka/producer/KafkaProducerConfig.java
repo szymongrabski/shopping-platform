@@ -24,7 +24,8 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
         props.put(JsonSerializer.TYPE_MAPPINGS,
-                "OrderAcceptedEvent:com.example.common.event.order.OrderAcceptedEvent");
+                "OrderAcceptedEvent:com.example.common.event.order.OrderAcceptedEvent," +
+                "OrderCompletedEvent:com.example.common.event.order.OrderCompletedEvent");
 
         return new DefaultKafkaProducerFactory<>(props);
     }

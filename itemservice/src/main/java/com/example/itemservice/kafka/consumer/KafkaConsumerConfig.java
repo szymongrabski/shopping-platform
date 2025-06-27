@@ -23,7 +23,8 @@ public class KafkaConsumerConfig {
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         configProps.put(JsonDeserializer.TRUSTED_PACKAGES, "com.example.common.event");
         configProps.put(JsonDeserializer.TYPE_MAPPINGS,
-                "OrderAcceptedEvent:com.example.common.event.order.OrderAcceptedEvent");
+                "OrderAcceptedEvent:com.example.common.event.order.OrderAcceptedEvent," +
+                "OrderCompletedEvent:com.example.common.event.order.OrderCompletedEvent");
 
         return new DefaultKafkaConsumerFactory<>(
                 configProps,

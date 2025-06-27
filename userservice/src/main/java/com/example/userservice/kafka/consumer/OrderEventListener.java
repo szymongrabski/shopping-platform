@@ -1,11 +1,10 @@
-package com.example.itemservice.kafka.consumer;
-
+package com.example.userservice.kafka.consumer;
 
 import com.example.common.event.order.OrderAcceptedEvent;
 import com.example.common.event.order.OrderCompletedEvent;
 import com.example.common.kafka.KafkaTopic;
-import com.example.itemservice.domain.ItemStatus;
-import com.example.itemservice.service.ItemService;
+import com.example.userservice.domain.ReviewEligibility;
+import com.example.userservice.service.ReviewEligibilityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,20 +14,16 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @KafkaListener(
         topics = KafkaTopic.ORDER_EVENTS,
-        groupId = "item-service-group",
+        groupId = "user-service-group",
         containerFactory = "kafkaListenerContainerFactory"
 )
 public class OrderEventListener {
-    private final ItemService itemService;
-
-    @KafkaHandler
-    public void handleOrderAccepted(OrderAcceptedEvent event) {
-        itemService.changeStatus(event.getItemId(), ItemStatus.ORDERED);
-    }
+    private final ReviewEligibilityService reviewEligibilityService;
 
     @KafkaHandler
     public void handleOrderCompletedEvent(OrderCompletedEvent event) {
-        itemService.changeStatus(event.getItemId(), ItemStatus.SOLD);
+        reviewEligibilityService.addReviewEligibility(event.getOrderId(),
+                event.getBuyerId(), event.getSellerId());
     }
 
     @KafkaHandler(isDefault = true)

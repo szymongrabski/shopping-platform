@@ -1,6 +1,7 @@
 package com.example.userservice.exceptions;
 
 import com.example.common.dto.response.ErrorResponse;
+import com.example.userservice.exceptions.notfound.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

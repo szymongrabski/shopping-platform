@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -16,8 +17,6 @@ public class User {
     @Id
     private Long id;
 
-    private String username;
-
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -28,4 +27,7 @@ public class User {
     private String phoneNumber;
 
     private LocalDate birthDate;
+
+    @OneToMany(mappedBy = "ratedUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews;
 }

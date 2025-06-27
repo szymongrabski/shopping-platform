@@ -2,6 +2,8 @@ package com.example.userservice.controller;
 
 import com.example.userservice.domain.User;
 import com.example.userservice.dto.request.UserRequest;
+import com.example.userservice.dto.response.UserWithRatingResponse;
+import com.example.userservice.mapper.UserMapper;
 import com.example.userservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
@@ -25,26 +28,27 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<User> getCurrentUser(Authentication authentication) {
+    public ResponseEntity<UserWithRatingResponse> getCurrentUser(Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        return ResponseEntity.ok(userService.getUserById(userId));
+        User user = userService.getUserById(userId);
+        return ResponseEntity.ok(userMapper.toUserWithRating(user));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
-    public ResponseEntity<User> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    public ResponseEntity<UserWithRatingResponse> findById(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        return ResponseEntity.ok(userMapper.toUserWithRating(user));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id,
+    public ResponseEntity<UserWithRatingResponse> updateUser(@PathVariable Long id,
                                            @RequestBody @Valid UserRequest userRequest,
                                            Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
         userService.authorizeUser(userId, id);
 
         User user = userService.updateUser(id, userRequest);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userMapper.toUserWithRating(user));
     }
 
     @DeleteMapping("/{id}")

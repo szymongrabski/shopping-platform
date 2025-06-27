@@ -1,6 +1,7 @@
 package com.example.orderservice.kafka.producer;
 
 import com.example.common.event.order.OrderAcceptedEvent;
+import com.example.common.event.order.OrderCompletedEvent;
 import com.example.common.kafka.KafkaTopic;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -12,6 +13,10 @@ public class OrderEventPublisher {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void publishOrderAccepted(OrderAcceptedEvent event) {
+        kafkaTemplate.send(KafkaTopic.ORDER_EVENTS, event);
+    }
+
+    public void publishOrderCompletedEvent(OrderCompletedEvent event) {
         kafkaTemplate.send(KafkaTopic.ORDER_EVENTS, event);
     }
 }

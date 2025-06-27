@@ -25,7 +25,9 @@ public class KafkaConsumerConfig {
         configProps.put(JsonDeserializer.TYPE_MAPPINGS,
                 "UserRegisteredEvent:com.example.common.event.user.UserRegisteredEvent," +
                         "UserDeletedEvent:com.example.common.event.user.UserDeletedEvent," +
-                "UserChangedEmailEvent:com.example.common.event.user.UserChangedEmailEvent");
+                "UserChangedEmailEvent:com.example.common.event.user.UserChangedEmailEvent," +
+                "OrderCompletedEvent:com.example.common.event.order.OrderCompletedEvent," +
+                        "OrderAcceptedEvent:com.example.common.event.order.OrderAcceptedEvent");
         configProps.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "com.example.common.event.user.UserRegisteredEvent");
 
         return new DefaultKafkaConsumerFactory<>(

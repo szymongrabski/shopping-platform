@@ -5,7 +5,7 @@ import com.example.common.event.user.UserDeletedEvent;
 import com.example.userservice.domain.User;
 import com.example.userservice.dto.request.UserRequest;
 import com.example.userservice.exceptions.ForbiddenException;
-import com.example.userservice.exceptions.UserNotFoundException;
+import com.example.userservice.exceptions.notfound.UserNotFoundException;
 import com.example.userservice.kafka.producer.UserEventPublisher;
 import com.example.userservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,6 @@ public class UserService {
     public User updateUser(Long id, UserRequest userRequest) {
         User user = getUserById(id);
 
-        user.setUsername(userRequest.getUsername());
         user.setFirstName(userRequest.getFirstName());
         user.setLastName(userRequest.getLastName());
         user.setPhoneNumber(userRequest.getPhoneNumber());

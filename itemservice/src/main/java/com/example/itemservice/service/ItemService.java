@@ -31,7 +31,7 @@ public class ItemService {
 
     static {
         allowedStatusTransitions.put(ItemStatus.ACTIVE, EnumSet.of(ItemStatus.ORDERED, ItemStatus.ARCHIVED));
-        allowedStatusTransitions.put(ItemStatus.ORDERED, EnumSet.of(ItemStatus.SOLD, ItemStatus.ACTIVE));
+        allowedStatusTransitions.put(ItemStatus.ORDERED, EnumSet.of(ItemStatus.SOLD, ItemStatus.ACTIVE, ItemStatus.ARCHIVED));
         allowedStatusTransitions.put(ItemStatus.SOLD, EnumSet.noneOf(ItemStatus.class));
         allowedStatusTransitions.put(ItemStatus.ARCHIVED, EnumSet.of(ItemStatus.ACTIVE));
     }

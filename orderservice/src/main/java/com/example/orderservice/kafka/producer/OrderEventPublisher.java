@@ -1,6 +1,7 @@
 package com.example.orderservice.kafka.producer;
 
 import com.example.common.event.order.OrderAcceptedEvent;
+import com.example.common.event.order.OrderCancelledEvent;
 import com.example.common.event.order.OrderCompletedEvent;
 import com.example.common.kafka.KafkaTopic;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,10 @@ public class OrderEventPublisher {
     }
 
     public void publishOrderCompletedEvent(OrderCompletedEvent event) {
+        kafkaTemplate.send(KafkaTopic.ORDER_EVENTS, event);
+    }
+
+    public void publishOrderCancelledEvent(OrderCancelledEvent event) {
         kafkaTemplate.send(KafkaTopic.ORDER_EVENTS, event);
     }
 }

@@ -1,7 +1,9 @@
 package com.example.itemservice.kafka.consumer;
 
 
+import com.example.common.event.order.CancellationType;
 import com.example.common.event.order.OrderAcceptedEvent;
+import com.example.common.event.order.OrderCancelledEvent;
 import com.example.common.event.order.OrderCompletedEvent;
 import com.example.common.kafka.KafkaTopic;
 import com.example.itemservice.domain.ItemStatus;
@@ -29,6 +31,15 @@ public class OrderEventListener {
     @KafkaHandler
     public void handleOrderCompletedEvent(OrderCompletedEvent event) {
         itemService.changeStatus(event.getItemId(), ItemStatus.SOLD);
+    }
+
+    @KafkaHandler
+    public void handleOrderCancelledEvent(OrderCancelledEvent event) {
+        if (event.getCancellationType() == CancellationType.BUYER_CANCEL) {
+            itemService.changeStatus(event.getItemId(), ItemStatus.ACTIVE);
+        } else if (event.getCancellationType() == CancellationType.SELLER_CANCEL) {
+            itemService.changeStatus(event.getItemId(), ItemStatus.ARCHIVED);
+        }
     }
 
     @KafkaHandler(isDefault = true)

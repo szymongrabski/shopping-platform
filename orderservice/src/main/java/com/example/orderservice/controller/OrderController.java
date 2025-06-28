@@ -58,6 +58,13 @@ public class OrderController {
         return ResponseEntity.ok(order);
     }
 
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<Order> cancelOrder(@PathVariable Long id, Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        Order cancelledOrder = orderService.cancelOrder(id, userId);
+        return ResponseEntity.ok(cancelledOrder);
+    }
+
     @PatchMapping("/{id}/extend-pickup")
     public ResponseEntity<Order> extendPickupDeadline(@PathVariable Long id,
                                                       @RequestParam int extraHours,

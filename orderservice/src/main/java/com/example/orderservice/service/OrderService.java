@@ -1,6 +1,8 @@
 package com.example.orderservice.service;
 
+import com.example.common.event.order.CancellationType;
 import com.example.common.event.order.OrderAcceptedEvent;
+import com.example.common.event.order.OrderCancelledEvent;
 import com.example.common.event.order.OrderCompletedEvent;
 import com.example.orderservice.client.ItemServiceClient;
 import com.example.orderservice.domain.*;
@@ -61,7 +63,25 @@ public class OrderService {
     public Order rejectOrder(Long orderId, Long userId) {
         Order order = getOrderById(orderId);
         checkIfSeller(order, userId);
+        order.setOrderStatus(OrderStatus.REJECTED);
+        return orderRepository.save(order);
+    }
+
+    public Order cancelOrder(Long orderId, Long userId) {
+        Order order = getOrderById(orderId);
+        checkIfSellerOrBuyer(order, userId);
         order.setOrderStatus(OrderStatus.CANCELLED);
+
+        CancellationType cancellationType = Objects.equals(userId, order.getSellerId())
+                ? CancellationType.SELLER_CANCEL : CancellationType.BUYER_CANCEL;
+        orderEventPublisher.publishOrderCancelledEvent(OrderCancelledEvent.builder()
+                .orderId(orderId)
+                .itemId(order.getItemId())
+                .buyerId(order.getBuyerId())
+                .sellerId(order.getSellerId())
+                .cancellationType(cancellationType)
+                .build());
+
         return orderRepository.save(order);
     }
 

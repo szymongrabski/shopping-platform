@@ -10,6 +10,7 @@ import com.example.orderservice.dto.request.OrderRequest;
 import com.example.orderservice.dto.response.ItemResponse;
 import com.example.orderservice.exception.badrequest.BadRequestException;
 import com.example.orderservice.exception.conflict.ConflictException;
+import com.example.orderservice.exception.conflict.InvalidOrderStatus;
 import com.example.orderservice.exception.conflict.ItemNotAvailableException;
 import com.example.orderservice.exception.forbidden.ForbiddenException;
 import com.example.orderservice.exception.notfound.OrderNotFound;
@@ -70,6 +71,10 @@ public class OrderService {
     public Order cancelOrder(Long orderId, Long userId) {
         Order order = getOrderById(orderId);
         checkIfSellerOrBuyer(order, userId);
+
+        if (order.getOrderStatus() != OrderStatus.AWAITING_PICKUP) {
+            throw new InvalidOrderStatus(orderId, order.getOrderStatus());
+        }
         order.setOrderStatus(OrderStatus.CANCELLED);
 
         CancellationType cancellationType = Objects.equals(userId, order.getSellerId())

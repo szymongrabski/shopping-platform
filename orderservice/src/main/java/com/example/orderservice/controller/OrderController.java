@@ -50,19 +50,19 @@ public class OrderController {
         return ResponseEntity.ok(rejectedOrder);
     }
 
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<Order> cancelOrder(@PathVariable Long id, Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        Order cancelledOrder = orderService.cancelOrder(id, userId);
+        return ResponseEntity.ok(cancelledOrder);
+    }
+
     @PatchMapping("/{id}/confirm-pickup")
     public ResponseEntity<Order> confirmPickup(@PathVariable Long id,
                                                Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
         Order order = orderService.confirmPickup(id, userId);
         return ResponseEntity.ok(order);
-    }
-
-    @PatchMapping("/{id}/cancel")
-    public ResponseEntity<Order> cancelOrder(@PathVariable Long id, Authentication authentication) {
-        Long userId = Long.parseLong(authentication.getName());
-        Order cancelledOrder = orderService.cancelOrder(id, userId);
-        return ResponseEntity.ok(cancelledOrder);
     }
 
     @PatchMapping("/{id}/extend-pickup")

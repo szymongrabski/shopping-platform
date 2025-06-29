@@ -4,7 +4,7 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 public class PhoneNumberValidator implements ConstraintValidator<ValidPhoneNumber, String> {
-    private static final String PHONE_PATTERN = "^\\+?[0-9]{7,15}$";
+    private static final String PHONE_PATTERN = "^[0-9]{9}$";
 
     @Override
     public boolean isValid(String phoneField, ConstraintValidatorContext context) {

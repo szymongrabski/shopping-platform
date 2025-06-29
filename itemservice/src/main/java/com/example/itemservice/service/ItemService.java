@@ -8,6 +8,7 @@ import com.example.itemservice.dto.request.ItemRequest;
 import com.example.itemservice.dto.request.LocationFilterRequest;
 import com.example.itemservice.exceptions.badrequest.BadRequestException;
 import com.example.itemservice.exceptions.conflict.InvalidItemStatusTransition;
+import com.example.itemservice.exceptions.conflict.ItemNotModifiable;
 import com.example.itemservice.exceptions.notfound.ItemNotFoundException;
 import com.example.itemservice.repository.ItemRepository;
 import com.example.itemservice.specification.ItemSpecification;
@@ -99,8 +100,13 @@ public class ItemService {
 
     public Item updateItem(Long id, ItemRequest itemRequest) {
         City city = cityService.findCityByName(itemRequest.getCityName());
+        Item item = findById(id);
 
-        Item item = Item.builder()
+        if (item.getItemStatus() == ItemStatus.ORDERED || item.getItemStatus() == ItemStatus.SOLD) {
+            throw new ItemNotModifiable(id, item.getItemStatus());
+        }
+
+        Item updatedItem = Item.builder()
                 .id(id)
                 .title(itemRequest.getTitle())
                 .description(itemRequest.getDescription())
@@ -109,7 +115,8 @@ public class ItemService {
                 .imageUrls(itemRequest.getImageUrls())
                 .city(city)
                 .build();
-        return itemRepository.save(item);
+
+        return itemRepository.save(updatedItem);
     }
 
     private static boolean canTransition(ItemStatus from, ItemStatus to) {

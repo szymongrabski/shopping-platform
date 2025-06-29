@@ -30,7 +30,8 @@ public class UserService {
     }
 
     public void deleteUserById(Long id) {
-        userRepository.deleteById(id);
+        User user = getUserById(id);
+        userRepository.delete(user);
 
         UserDeletedEvent event = UserDeletedEvent.builder()
                 .userId(id)

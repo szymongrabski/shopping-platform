@@ -1,9 +1,9 @@
 package com.example.userservice.kafka.consumer;
 
-import com.example.common.event.order.OrderAcceptedEvent;
+import com.example.common.event.order.CancellationType;
+import com.example.common.event.order.OrderCancelledEvent;
 import com.example.common.event.order.OrderCompletedEvent;
 import com.example.common.kafka.KafkaTopic;
-import com.example.userservice.domain.ReviewEligibility;
 import com.example.userservice.service.ReviewEligibilityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -24,6 +24,15 @@ public class OrderEventListener {
     public void handleOrderCompletedEvent(OrderCompletedEvent event) {
         reviewEligibilityService.addReviewEligibility(event.getOrderId(),
                 event.getBuyerId(), event.getSellerId());
+    }
+
+    @KafkaHandler
+    public void handleOrderCancelledEvent(OrderCancelledEvent event) {
+        if (event.getCancellationType() == CancellationType.SELLER_CANCEL) {
+            reviewEligibilityService.addReviewEligibility(event.getOrderId(),
+                    event.getBuyerId(),
+                    event.getSellerId());
+        }
     }
 
     @KafkaHandler(isDefault = true)

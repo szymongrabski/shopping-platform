@@ -9,6 +9,8 @@
 *.bak
 *.tmp
 
+authservice/src/main/resources/keys/private.key
+**/keys
 **/target/
 **/out/
 
@@ -37,8 +39,7 @@ Thumbs.db
 **/.settings/
 **/.factorypath
 
-**/application.properties
-**/application-dev.properties
+
 **/application.yml
 **/application-*.yml
 !**/src/main/resources/application.yml

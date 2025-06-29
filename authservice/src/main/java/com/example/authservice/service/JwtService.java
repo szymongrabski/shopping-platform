@@ -2,21 +2,37 @@ package com.example.authservice.service;
 
 import com.example.authservice.domain.User;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
-
-import javax.crypto.SecretKey;
+import java.io.InputStream;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
 public class JwtService {
-    @Value("${jwt.secret-key}")
-    private String SECRET_KEY;
+    private PrivateKey getPrivateKey() {
+        try {
+            InputStream inputStream = getClass().getResourceAsStream("/keys/private.key");
+            String key = new String(inputStream.readAllBytes())
+                    .replaceAll("\\n", "")
+                    .replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replace("-----END PRIVATE KEY-----", "");
+
+            byte[] keyBytes = Base64.getDecoder().decode(key);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            return kf.generatePrivate(keySpec);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while loading private key", e);
+        }
+    }
 
     public String generateToken(User user) {
         return generateToken(new HashMap<>(), user);
@@ -26,17 +42,13 @@ public class JwtService {
         extraClaims.put("roles", user.getAuthorities()
                 .stream().map(GrantedAuthority::getAuthority).toList());
 
+        Instant now = Instant.now();
         return Jwts.builder()
-                .claims(extraClaims)
                 .subject(String.valueOf(user.getId()))
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
-                .signWith(getSignInKey(), Jwts.SIG.HS256)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plus(10, ChronoUnit.HOURS)))
+                .claims(extraClaims)
+                .signWith(getPrivateKey(), Jwts.SIG.RS256)
                 .compact();
-    }
-
-    private SecretKey getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
     }
 }
